@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: payment
+  mongodb:
+    uri: mongodb://admin:password@localhost:27017/payment?authSource=admin
+
+server:
+  port: 8081
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.cache: TRACE
+    org.wavemoney.payment: DEBUG
+
+#  data:
+#    redis:
+#      host: localhost
+#      port: 6379
+
+#  kafka:
+#    bootstrap-servers: localhost:9092
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+#    consumer:
+#      group-id: payment-service
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#
+#
+#transaction-amount:
+#  min: 1
+#  max: 300000
+#
+#wallet-limit: 10000000
+#
+#app:
+#  kafka:
+#    topics:
+#      cash-in-events: payment.cashin.events
+#      adjustment-events: payment.adjustment.events
+#      transaction-events: payment.transaction.events
+#
+#  security:
+#    jwt:
+#      secret: ${JWT_SECRET:abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz}
+#      expiration-ms: 3600000
+#    public-paths:
+#      - /api/v1/users/login
+#      - /api/v1/users
