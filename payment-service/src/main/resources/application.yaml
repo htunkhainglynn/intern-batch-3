@@ -1,11 +1,12 @@
 spring:
   application:
     name: payment
-  mongodb:
-    uri: mongodb://admin:password@localhost:27017/payment?authSource=admin
+  data:
+    mongodb:
+      uri: mongodb://admin:password@localhost:27017/payment?authSource=admin
 
 server:
-  port: 8081
+  port: 8082
 
 logging:
   level:
