@@ -13,7 +13,7 @@ import org.wavemoney.payment.api.service.UserService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/users")
 @AllArgsConstructor
 public class UserController {
 
@@ -57,5 +57,14 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(users, "All users fetched"));
+    }
+
+    @PatchMapping("/{phone}/level")
+    public ResponseEntity<UserResponse> upgradeUserLevel(
+            @PathVariable String phone,
+            @RequestParam(defaultValue = "2") String level) {
+
+        UserResponse response = userService.upgradeUserLevel(phone, level);
+        return ResponseEntity.ok(response);
     }
 }

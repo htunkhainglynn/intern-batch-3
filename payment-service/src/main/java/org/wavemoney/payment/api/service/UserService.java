@@ -10,4 +10,6 @@ public interface UserService {
     UserResponse updateUserByPhone(String phone, UserRequest userRequest);
     void deleteUserByPhone(String phone);
     List<UserResponse> getAllUsers();
+
+    UserResponse upgradeUserLevel(String phone, String newLevel);
 }

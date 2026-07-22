@@ -6,6 +6,7 @@ import org.wavemoney.payment.api.dto.request.WalletRequest;
 import org.wavemoney.payment.api.dto.response.WalletResponse;
 import org.wavemoney.payment.api.entity.Wallet;
 import org.wavemoney.payment.api.enums.WalletStatus;
+import org.wavemoney.payment.api.exception.BusinessLogicException;
 import org.wavemoney.payment.api.repository.WalletRepository;
 import org.wavemoney.payment.api.service.WalletService;
 
@@ -24,7 +25,7 @@ public class WalletServiceImpl implements WalletService {
 
         Wallet wallet = Wallet.builder()
                 .phone(request.phone())
-                .balance(BigDecimal.ZERO)
+                .balance(request.balance() != null ? request.balance() : BigDecimal.ZERO)
                 .currency(request.currency())
                 .walletStatus(WalletStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
@@ -87,5 +88,24 @@ public class WalletServiceImpl implements WalletService {
                 .createdAt(wallet.getCreatedAt())
                 .updatedAt(wallet.getUpdateAt())
                 .build();
+    }
+
+    @Override
+    public WalletStatus getWalletStatusByPhone(String phone) {
+        return walletRepository.findByPhone(phone)
+                .map(Wallet::getWalletStatus)
+                .orElseThrow(() -> BusinessLogicException.notFound("WALLET_NOT_FOUND", "Wallet not found with phone: " + phone));
+    }
+
+    @Override
+    public WalletResponse updateWalletStatusByPhone(String phone, WalletStatus status) {
+        Wallet wallet = walletRepository.findByPhone(phone)
+                .orElseThrow(() -> BusinessLogicException.notFound("WALLET_NOT_FOUND", "Wallet not found with phone: " + phone));
+
+        wallet.setWalletStatus(status);
+        wallet.setUpdateAt(LocalDateTime.now());
+
+        Wallet updatedWallet = walletRepository.save(wallet);
+        return mapToResponse(updatedWallet);
     }
 }
