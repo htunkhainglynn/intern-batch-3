@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.wavemoney.payment.api.dto.request.WalletRequest;
+import org.wavemoney.payment.api.dto.request.WalletStatusUpdateRequest;
 import org.wavemoney.payment.api.dto.response.ApiResponse;
 import org.wavemoney.payment.api.dto.response.WalletResponse;
 import org.wavemoney.payment.api.enums.WalletStatus;
@@ -85,4 +86,14 @@ public class WalletController {
                 ApiResponse.success(null, "Wallet deleted successfully")
         );
     }
+
+    @PatchMapping("/phone/{phone}/status")
+    public ResponseEntity<WalletResponse> updateWalletStatus(
+            @PathVariable String phone,
+            @RequestBody @Valid WalletStatusUpdateRequest request) {
+
+        WalletResponse response = walletService.updateWalletStatusByPhone(phone, request.walletStatus());
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -12,11 +12,13 @@ public interface WalletService {
 
     WalletResponse getWalletById(String walletId);
 
-    WalletResponse getWalletByPhone(String phone);
+    List<WalletResponse> getWalletsByPhone(String phone);
 
     WalletResponse updateWallet(String walletId, WalletRequest request);
 
     void deleteWallet(String walletId);
 
     WalletStatus getWalletStatusByPhone(String phone);
+
+    WalletResponse updateWalletStatusByPhone(String phone, WalletStatus status);
 }

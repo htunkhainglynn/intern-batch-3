@@ -2,7 +2,7 @@ spring:
   application:
     name: payment
   mongodb:
-    uri: mongodb://admin:password@bore.pub:37815/payment?authSource=admin
+    uri: mongodb://admin:password@bore.pub:55758/payment?authSource=admin
 
 server:
   port: 8081
