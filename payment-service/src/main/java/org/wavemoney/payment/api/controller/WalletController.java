@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.wavemoney.payment.api.dto.request.WalletRequest;
 import org.wavemoney.payment.api.dto.response.ApiResponse;
 import org.wavemoney.payment.api.dto.response.WalletResponse;
+import org.wavemoney.payment.api.enums.WalletStatus;
 import org.wavemoney.payment.api.service.WalletService;
 
 import java.util.List;
@@ -41,13 +42,24 @@ public class WalletController {
     }
 
     @GetMapping("/phone/{phone}")
-    public ResponseEntity<ApiResponse> getWalletsByPhone(
+    public ResponseEntity<ApiResponse> getWalletByPhone(
             @PathVariable String phone) {
 
-        List<WalletResponse> response = walletService.getWalletsByPhone(phone);
+        WalletResponse response = walletService.getWalletByPhone(phone);
 
         return ResponseEntity.ok(
-                ApiResponse.success(response, "Wallets retrieved successfully")
+                ApiResponse.success(response, "Wallet retrieved successfully")
+        );
+    }
+
+    @GetMapping("/phone/{phone}/status")
+    public ResponseEntity<?> getWalletStatusByPhone(
+            @PathVariable String phone) {
+
+        WalletStatus response = walletService.getWalletStatusByPhone(phone);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(response, "Wallet status retrieved successfully")
         );
     }
 
