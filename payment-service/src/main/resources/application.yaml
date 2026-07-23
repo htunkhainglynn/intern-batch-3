@@ -2,10 +2,15 @@ spring:
   application:
     name: payment
   mongodb:
-    uri: mongodb://admin:password@bore.pub:55758/payment?authSource=admin
+    uri: mongodb://admin:password@bore.pub:28017/payment?authSource=admin
+  kafka:
+    bootstrap-servers: bore.pub:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
 
 server:
-  port: 8081
+  port: 8083
 
 logging:
   level:
@@ -13,6 +18,11 @@ logging:
     org.springframework: INFO
     org.springframework.cache: TRACE
     org.wavemoney.payment: DEBUG
+
+transaction-amount:
+  min: 100
+
+wallet-limit: 10000000
 
 #  data:
 #    redis:
@@ -31,11 +41,6 @@ logging:
 #      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 #
 #
-#transaction-amount:
-#  min: 1
-#  max: 300000
-#
-#wallet-limit: 10000000
 #
 #app:
 #  kafka:

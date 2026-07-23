@@ -1,6 +1,9 @@
 package org.wavemoney.payment.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.wavemoney.payment.api.dto.request.SendMoneyRequest;
@@ -22,18 +25,23 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
-    private static final double MAXIMUM_WALLET_LIMIT = 100000.0;
-    private static final double MINIMUM_TRANSACTION_AMOUNT = 100.0;
+    @Value("${transaction-amount.min}")
+    private double minimumTransactionAmount;
+
+    @Value("${wallet-limit}")
+    private double walletLimit;
 
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
+    private final KafkaTemplate kafkaTemplate;
 
     @Override
-//    @Transactional
     public SendMoneyResponse sendMoney(SendMoneyRequest request) {
+        log.info("Request received: {}", request);
         // Validate all 6 conditions & retrieve entities
         ValidatedTransferData transferData = validateSendMoneyTransaction(request);
 
@@ -45,6 +53,7 @@ public class TransactionServiceImpl implements TransactionService {
         senderWallet.setBalance(senderWallet.getBalance().subtract(transferAmount));
         receiverWallet.setBalance(receiverWallet.getBalance().add(transferAmount));
 
+        log.info("Sender Wallet: {}, Receiver Wallet: {}", senderWallet, receiverWallet);
         walletRepository.save(senderWallet);
         walletRepository.save(receiverWallet);
 
@@ -58,6 +67,11 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
 
         Transaction savedTransaction = transactionRepository.save(transaction);
+
+        log.info("Transaction saved: {}", savedTransaction);
+
+        log.info("Sending transaction event to Kafka: {}", savedTransaction);
+        kafkaTemplate.send("transaction-events", savedTransaction);
 
         return SendMoneyResponse.builder()
                 .transactionId(savedTransaction.getTransactionId())
@@ -76,8 +90,8 @@ public class TransactionServiceImpl implements TransactionService {
     private ValidatedTransferData validateSendMoneyTransaction(SendMoneyRequest request) {
 
         // Rule 6: Amount must be > 100
-        if (request.amount() == null || request.amount() <= MINIMUM_TRANSACTION_AMOUNT) {
-            throw BusinessLogicException.business("INVALID_AMOUNT", "Transaction amount must be greater than " + MINIMUM_TRANSACTION_AMOUNT);
+        if (request.amount() == null || request.amount() <= minimumTransactionAmount) {
+            throw BusinessLogicException.business("INVALID_AMOUNT", "Transaction amount must be greater than " + minimumTransactionAmount);
         }
 
         // Rule 1: Check receiver account exists or not (also check sender existence)
@@ -117,8 +131,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Rule 5: Receiver balance hit limit (maximum 100,000)
         BigDecimal projectedReceiverBalance = receiverWallet.getBalance().add(transferAmount);
-        if (projectedReceiverBalance.compareTo(BigDecimal.valueOf(MAXIMUM_WALLET_LIMIT)) > 0) {
-            throw BusinessLogicException.business("RECEIVER_LIMIT_EXCEEDED", "Transaction would cause receiver balance to exceed limit of " + MAXIMUM_WALLET_LIMIT);
+        if (projectedReceiverBalance.compareTo(BigDecimal.valueOf(walletLimit)) > 0) {
+            throw BusinessLogicException.business("RECEIVER_LIMIT_EXCEEDED", "Transaction would cause receiver balance to exceed limit of " + walletLimit);
         }
 
         return new ValidatedTransferData(senderWallet, receiverWallet);
