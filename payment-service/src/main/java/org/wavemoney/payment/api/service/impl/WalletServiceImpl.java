@@ -47,12 +47,12 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public WalletResponse getWalletByPhone(String phone) {
+    public List<WalletResponse> getWalletsByPhone(String phone) {
 
-        Wallet wallet = walletRepository.findByPhone(phone)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
-
-        return mapToResponse(wallet);
+        return walletRepository.findAllByPhone(phone)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     @Override
@@ -76,14 +76,6 @@ public class WalletServiceImpl implements WalletService {
                 .orElseThrow(() -> new RuntimeException("Wallet not found"));
 
         walletRepository.delete(wallet);
-    }
-
-    @Override
-    public WalletStatus getWalletStatusByPhone(String phone){
-        Wallet wallet = walletRepository.findByPhone(phone)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
-
-        return wallet.getWalletStatus();
     }
 
     private WalletResponse mapToResponse(Wallet wallet) {

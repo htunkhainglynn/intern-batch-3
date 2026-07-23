@@ -3,6 +3,17 @@ spring:
     name: payment
   mongodb:
     uri: mongodb://admin:password@bore.pub:55758/payment?authSource=admin
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+    consumer:
+      group-id: payment-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 
 server:
   port: 8081
