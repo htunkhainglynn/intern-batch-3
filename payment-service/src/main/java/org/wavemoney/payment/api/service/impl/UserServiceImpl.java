@@ -1,6 +1,7 @@
 package org.wavemoney.payment.api.service.impl;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.wavemoney.payment.api.dto.request.UserRequest;
 import org.wavemoney.payment.api.dto.request.WalletRequest;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -53,6 +55,7 @@ public class UserServiceImpl implements UserService {
 
         // 3. Automatically create the wallet
         WalletResponse walletResponse = walletService.createWallet(walletRequest);
+        log.info("Wallet Created {}" , walletResponse);
 
         return mapToUserResponse(savedUser, walletResponse.walletStatus());
     }
