@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.wavemoney.payment.api.dto.request.SendMoneyRequest;
 import org.wavemoney.payment.api.dto.response.SendMoneyResponse;
 import org.wavemoney.payment.api.entity.User;
@@ -38,6 +39,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final KafkaTemplate kafkaTemplate;
+    private final RestTemplate restTemplate;
 
     @Override
     public SendMoneyResponse sendMoney(SendMoneyRequest request) {
@@ -72,6 +74,9 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("Sending transaction event to Kafka: {}", savedTransaction);
         kafkaTemplate.send("transaction-events", savedTransaction);
+
+        // send notification
+        restTemplate.postForEntity("http://localhost:8080/api/notification", savedTransaction.toString(), Void.class);
 
         return SendMoneyResponse.builder()
                 .transactionId(savedTransaction.getTransactionId())
